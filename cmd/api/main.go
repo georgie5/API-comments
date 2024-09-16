@@ -13,7 +13,7 @@ const appVersion = "1.0.0"
 
 type serverConfig struct {
 	port        int
-	environmnet string
+	environment string
 }
 
 type applicationDependecies struct {
@@ -26,7 +26,7 @@ func main() {
 	var settings serverConfig
 
 	flag.IntVar(&settings.port, "port", 4000, "Server port")
-	flag.StringVar(&settings.environmnet, "env", "development", "Environment(developmnet|staging|production)")
+	flag.StringVar(&settings.environment, "env", "development", "Environment(developmnet|staging|production)")
 
 	flag.Parse()
 
@@ -48,7 +48,7 @@ func main() {
 		ErrorLog:    slog.NewLogLogger(logger.Handler(), slog.LevelError),
 	}
 
-	logger.Info("starting server", "address", apiServer.Addr, "environment", settings.environmnet)
+	logger.Info("starting server", "address", apiServer.Addr, "environment", settings.environment)
 	err := apiServer.ListenAndServe()
 	logger.Error(err.Error())
 	os.Exit(1)
