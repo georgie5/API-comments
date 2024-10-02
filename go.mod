@@ -1,3 +1,3 @@
-module github.com/georgie5
+module georgie5.net/API-comments
 
-go 1.23.0
+go 1.22.7
