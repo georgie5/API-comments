@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-func (a *applicationDependecies) healthChechHandler(w http.ResponseWriter, r *http.Request) {
+func (a *applicationDependecies) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := envelope{
 		"status": "available",
@@ -13,9 +13,8 @@ func (a *applicationDependecies) healthChechHandler(w http.ResponseWriter, r *ht
 			"version":     appVersion,
 		},
 	}
-
 	err := a.writeJSON(w, http.StatusOK, data, nil)
 	if err != nil {
-		a.serverErrorResponse(w, r, err )
+		a.serverErrorResponse(w, r, err)
 	}
 }

@@ -37,12 +37,12 @@ func main() {
 		logger: logger,
 	}
 
-	router := http.NewServeMux()
-	router.HandleFunc("/v1/healthcheck", appInstance.healthChechHandler)
+	// router := http.NewServeMux()
+	// router.HandleFunc("/v1/healthcheck", appInstance.healthChechHandler)
 
 	apiServer := &http.Server{
 		Addr:        fmt.Sprintf(":%d", settings.port),
-		Handler:     router,
+		Handler:     appInstance.routes(),
 		IdleTimeout: time.Minute,
 		ReadTimeout: 5 * time.Second,
 		ErrorLog:    slog.NewLogLogger(logger.Handler(), slog.LevelError),
@@ -54,4 +54,3 @@ func main() {
 	os.Exit(1)
 
 }
-
