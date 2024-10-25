@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (a *applicationDependecies) recoverPanic(next http.Handler) http.Handler {
+func (a *applicationDependencies) recoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// defer will be called when the stack unwinds
 		defer func() {

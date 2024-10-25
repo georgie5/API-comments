@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-func (a *applicationDependecies) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
+func (a *applicationDependencies) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := envelope{
 		"status": "available",

@@ -8,7 +8,7 @@ import (
 	// _ "github.com/georgie5/API-comments/internal/data"
 )
 
-func (a *applicationDependecies) createCommentHandler(w http.ResponseWriter,
+func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter,
 	r *http.Request) {
 	// create a struct to hold a comment
 	// we use struct tags[“] to make the names display in lowercase

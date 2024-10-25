@@ -23,7 +23,7 @@ type serverConfig struct {
 	}
 }
 
-type applicationDependecies struct {
+type applicationDependencies struct {
 	config serverConfig
 	logger *slog.Logger
 }
@@ -53,7 +53,7 @@ func main() {
 
 	logger.Info("database connection pool established")
 
-	appInstance := &applicationDependecies{
+	appInstance := &applicationDependencies{
 		config: settings,
 		logger: logger,
 	}

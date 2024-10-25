@@ -11,7 +11,7 @@ import (
 
 type envelope map[string]any
 
-func (a *applicationDependecies) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
+func (a *applicationDependencies) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 
 	jsResponse, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
@@ -37,7 +37,7 @@ func (a *applicationDependecies) writeJSON(w http.ResponseWriter, status int, da
 
 }
 
-// func (a *applicationDependecies) readJSON(w http.ResponseWriter, r *http.Request, destination any) error {
+// func (a *applicationDependencies) readJSON(w http.ResponseWriter, r *http.Request, destination any) error {
 
 // 	err := json.NewDecoder(r.Body).Decode(destination)
 // 	if err != nil {
@@ -74,7 +74,7 @@ func (a *applicationDependecies) writeJSON(w http.ResponseWriter, status int, da
 // 	return nil
 // }
 
-func (a *applicationDependecies) readJSON(w http.ResponseWriter, r *http.Request, destination any) error {
+func (a *applicationDependencies) readJSON(w http.ResponseWriter, r *http.Request, destination any) error {
 
 	// what is the max size of the request body (250KB seems reasonable)
 	maxBytes := 256_000
