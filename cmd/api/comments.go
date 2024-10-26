@@ -4,8 +4,10 @@ import (
 	// "encoding/json"
 	"fmt"
 	"net/http"
+
 	// import the data package which contains the definition for Comment
-	// _ "github.com/georgie5/API-comments/internal/data"
+	"georgie5.net/API-comments/internal/data"
+	"georgie5.net/API-comments/internal/validator"
 )
 
 func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter,
@@ -23,7 +25,23 @@ func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter,
 		a.badRequestResponse(w, r, err)
 		return
 	}
+	// Copy the values from incomingData to a new Comment struct
+	// At this point in our code the JSON is well-formed JSON so now
+	// we will validate it using the Validator which expects a Comment
+	comment := &data.Comment{
+		Content: incomingData.Content,
+		Author:  incomingData.Author,
+	}
+	// Initialize a Validator instance
+	v := validator.New()
 
-	// for now display the result
+	// Do the validation
+	data.ValidateComment(v, comment)
+	if !v.IsEmpty() {
+		a.failedValidationResponse(w, r, v.Errors) // implemented later
+		return
+	}
+
 	fmt.Fprintf(w, "%+v\n", incomingData)
+
 }
