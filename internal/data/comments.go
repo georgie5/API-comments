@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"georgie5.net/API-comments/internal/validator"
@@ -15,11 +16,11 @@ type CommentModel struct {
 
 // each name begins with uppercase so that they are exportable/public
 type Comment struct {
-	ID        int64     `json: "id"`      // unique value for each comment
-	Content   string    `json: "content"` // the comment data
-	Author    string    `json: "author"`  // the person who wrote the comment
-	CreatedAt time.Time `json: "-"`       // database timestamp
-	Version   int32     `json: "version"` // incremented on each update
+	ID        int64     `json:"id"`      // unique value for each comment
+	Content   string    `json:"content"` // the comment data
+	Author    string    `json:"author"`  // the person who wrote the comment
+	CreatedAt time.Time `json:"-"`       // database timestamp
+	Version   int32     `json:"version"` // incremented on each update
 }
 
 // Create a function that performs the validation checks
@@ -59,5 +60,99 @@ func (c CommentModel) Insert(comment *Comment) error {
 		&comment.ID,
 		&comment.CreatedAt,
 		&comment.Version)
+
+}
+
+// Get a specific Comment from the comments table
+func (c CommentModel) Get(id int64) (*Comment, error) {
+	// check if the id is valid
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+	// the SQL query to be executed against the database table
+	query := `
+		 SELECT id, created_at, content, author, version
+		 FROM comments
+		 WHERE id = $1
+	 	`
+	// declare a variable of type Comment to store the returned comment
+	var comment Comment
+
+	// Set a 3-second context/timer
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := c.DB.QueryRowContext(ctx, query, id).Scan(
+		&comment.ID,
+		&comment.CreatedAt,
+		&comment.Content,
+		&comment.Author,
+		&comment.Version,
+	)
+	// check for which type of error
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &comment, nil
+}
+
+// Update a specific Comment from the comments table
+func (c CommentModel) Update(comment *Comment) error {
+	// The SQL query to be executed against the database table
+	// Every time we make an update, we increment the version number
+	query := `
+			UPDATE comments
+			SET content = $1, author = $2, version = version + 1
+			WHERE id = $3
+			RETURNING version
+			`
+	args := []any{comment.Content, comment.Author, comment.ID}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return c.DB.QueryRowContext(ctx, query, args...).Scan(&comment.Version)
+
+}
+
+// Delete a specific Comment from the comments table
+func (c CommentModel) Delete(id int64) error {
+
+	// check if the id is valid
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+	// the SQL query to be executed against the database table
+	query := `
+        DELETE FROM comments
+        WHERE id = $1
+	`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	// ExecContext does not return any rows unlike QueryRowContext.
+	// It only returns  information about the the query execution
+	// such as how many rows were affected
+	result, err := c.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	// Were any rows  delete?
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	// Probably a wrong id was provided or the client is trying to
+	// delete an already deleted comment
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
+	return nil
 
 }
