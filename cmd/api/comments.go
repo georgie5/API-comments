@@ -231,13 +231,14 @@ func (a *applicationDependencies) listCommentsHandler(w http.ResponseWriter, r *
 		return
 	}
 
-	comments, err := a.commentModel.GetAll(queryParametersData.Content, queryParametersData.Author, queryParametersData.Filters)
+	comments, metadata, err := a.commentModel.GetAll(queryParametersData.Content, queryParametersData.Author, queryParametersData.Filters)
 	if err != nil {
 		a.serverErrorResponse(w, r, err)
 		return
 	}
 	data := envelope{
-		"comments": comments,
+		"comments":  comments,
+		"@metadata": metadata,
 	}
 	err = a.writeJSON(w, http.StatusOK, data, nil)
 	if err != nil {
