@@ -4,9 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 	"time"
 
@@ -21,6 +19,12 @@ type serverConfig struct {
 	environment string
 	db          struct {
 		dsn string
+	}
+
+	limiter struct {
+		rps     float64 // requests per second
+		burst   int     // initial requests possible
+		enabled bool    // enable or disable rate limiter
 	}
 }
 
@@ -38,6 +42,12 @@ func main() {
 	flag.StringVar(&settings.environment, "env", "development", "Environment(developmnet|staging|production)")
 
 	flag.StringVar(&settings.db.dsn, "db-dsn", "postgres://comments:fishsticks@localhost/comments?sslmode=disable", "PostgreSQL DSN")
+
+	flag.Float64Var(&settings.limiter.rps, "limiter-rps", 2, "Rate Limiter maximum requests per second")
+
+	flag.IntVar(&settings.limiter.burst, "limiter-burst", 5, "Rate Limiter maximum burst")
+
+	flag.BoolVar(&settings.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
 	flag.Parse()
 
@@ -61,21 +71,11 @@ func main() {
 		commentModel: data.CommentModel{DB: db},
 	}
 
-	// router := http.NewServeMux()
-	// router.HandleFunc("/v1/healthcheck", appInstance.healthChechHandler)
-
-	apiServer := &http.Server{
-		Addr:        fmt.Sprintf(":%d", settings.port),
-		Handler:     appInstance.routes(),
-		IdleTimeout: time.Minute,
-		ReadTimeout: 5 * time.Second,
-		ErrorLog:    slog.NewLogLogger(logger.Handler(), slog.LevelError),
+	err = appInstance.serve()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
-
-	logger.Info("starting server", "address", apiServer.Addr, "environment", settings.environment)
-	err = apiServer.ListenAndServe()
-	logger.Error(err.Error())
-	os.Exit(1)
 
 }
 
