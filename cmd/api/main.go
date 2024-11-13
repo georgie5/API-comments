@@ -32,6 +32,7 @@ type applicationDependencies struct {
 	config       serverConfig
 	logger       *slog.Logger
 	commentModel data.CommentModel
+	userModel    data.UserModel
 }
 
 func main() {
@@ -69,6 +70,7 @@ func main() {
 		config:       settings,
 		logger:       logger,
 		commentModel: data.CommentModel{DB: db},
+		userModel:    data.UserModel{DB: db},
 	}
 
 	err = appInstance.serve()

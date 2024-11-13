@@ -22,6 +22,9 @@ func (a *applicationDependencies) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/v1/comments/:id", a.deleteCommentHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/comments", a.listCommentsHandler)
 
+	// user routers:
+	router.HandlerFunc(http.MethodPost, "/v1/users", a.registerUserHandler)
+
 	// Request sent first to recoverPanic() then sent to rateLimit()
 	// finally it is sent to the router.
 	return a.recoverPanic(a.rateLimit(router))
