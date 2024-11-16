@@ -6,9 +6,11 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"sync"
 	"time"
 
 	"georgie5.net/API-comments/internal/data"
+	"georgie5.net/API-comments/internal/mailer"
 	_ "github.com/lib/pq"
 )
 
@@ -26,6 +28,14 @@ type serverConfig struct {
 		burst   int     // initial requests possible
 		enabled bool    // enable or disable rate limiter
 	}
+
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type applicationDependencies struct {
@@ -33,6 +43,9 @@ type applicationDependencies struct {
 	logger       *slog.Logger
 	commentModel data.CommentModel
 	userModel    data.UserModel
+	mailer       mailer.Mailer
+	wg           sync.WaitGroup // need this later for background jobs
+
 }
 
 func main() {
@@ -49,6 +62,17 @@ func main() {
 	flag.IntVar(&settings.limiter.burst, "limiter-burst", 5, "Rate Limiter maximum burst")
 
 	flag.BoolVar(&settings.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
+
+	flag.StringVar(&settings.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
+	// We have port 25, 465, 587, 2525. If 25 doesn't work choose another
+	flag.IntVar(&settings.smtp.port, "smtp-port", 2525, "SMTP port")
+	// Use your Username value provided by Mailtrap
+	flag.StringVar(&settings.smtp.username, "smtp-username", "5f68753fd3d8ce", "SMTP username")
+
+	// Use your Password value provided by Mailtrap
+	flag.StringVar(&settings.smtp.password, "smtp-password", "f8e72801757fc0", "SMTP password")
+
+	flag.StringVar(&settings.smtp.sender, "smtp-sender", "Comments Community <no-reply@commentscommunity.georgie.net>", "SMTP sender")
 
 	flag.Parse()
 
@@ -71,6 +95,7 @@ func main() {
 		logger:       logger,
 		commentModel: data.CommentModel{DB: db},
 		userModel:    data.UserModel{DB: db},
+		mailer:       mailer.New(settings.smtp.host, settings.smtp.port, settings.smtp.username, settings.smtp.password, settings.smtp.sender),
 	}
 
 	err = appInstance.serve()
