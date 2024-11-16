@@ -25,6 +25,11 @@ func (a *applicationDependencies) routes() http.Handler {
 	// user routers:
 	router.HandlerFunc(http.MethodPost, "/v1/users", a.registerUserHandler)
 
+	// We use PUT instead of POST because PUT is idempotent
+	// and appropriate for this endpoint.  The activation
+	// should only happens once, also we are not creating a resource
+	router.HandlerFunc(http.MethodPut, "/v1/users/activated", a.activateUserHandler)
+
 	// Request sent first to recoverPanic() then sent to rateLimit()
 	// finally it is sent to the router.
 	return a.recoverPanic(a.rateLimit(router))

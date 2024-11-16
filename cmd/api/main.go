@@ -45,7 +45,7 @@ type applicationDependencies struct {
 	userModel    data.UserModel
 	mailer       mailer.Mailer
 	wg           sync.WaitGroup // need this later for background jobs
-
+	tokenModel   data.TokenModel
 }
 
 func main() {
@@ -65,7 +65,7 @@ func main() {
 
 	flag.StringVar(&settings.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP host")
 	// We have port 25, 465, 587, 2525. If 25 doesn't work choose another
-	flag.IntVar(&settings.smtp.port, "smtp-port", 2525, "SMTP port")
+	flag.IntVar(&settings.smtp.port, "smtp-port", 587, "SMTP port")
 	// Use your Username value provided by Mailtrap
 	flag.StringVar(&settings.smtp.username, "smtp-username", "5f68753fd3d8ce", "SMTP username")
 
@@ -96,6 +96,7 @@ func main() {
 		commentModel: data.CommentModel{DB: db},
 		userModel:    data.UserModel{DB: db},
 		mailer:       mailer.New(settings.smtp.host, settings.smtp.port, settings.smtp.username, settings.smtp.password, settings.smtp.sender),
+		tokenModel:   data.TokenModel{DB: db},
 	}
 
 	err = appInstance.serve()
