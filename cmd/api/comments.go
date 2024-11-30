@@ -11,8 +11,7 @@ import (
 	"georgie5.net/API-comments/internal/validator"
 )
 
-func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter,
-	r *http.Request) {
+func (a *applicationDependencies) createCommentHandler(w http.ResponseWriter, r *http.Request) {
 	// create a struct to hold a comment
 	// we use struct tags[“] to make the names display in lowercase
 	var incomingData struct {
